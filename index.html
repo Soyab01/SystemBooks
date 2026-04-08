@@ -16,16 +16,16 @@
     <style>
         body { 
             font-family: 'Poppins', sans-serif; 
-            /* White -> Yellow -> Orange Gradient */
             background: linear-gradient(135deg, #ffffff 0%, #fff1c1 50%, #ffcc80 100%);
             background-attachment: fixed;
             min-height: 100vh;
             color: #333;
         }
 
+        /* Utility Class to Hide Elements */
         .hidden-modal { display: none !important; }
 
-        /* Glassmorphism Design */
+        /* Glassmorphism */
         .glass-card {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
@@ -34,7 +34,6 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
-        /* Orange Theme Button */
         .glass-btn {
             background: linear-gradient(to right, #ff9966, #ff5e62);
             color: white;
@@ -43,7 +42,7 @@
         }
         .glass-btn:active { transform: scale(0.96); }
 
-        /* Navigation Bar */
+        /* Floating Nav */
         .nav-island {
             position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
             width: 95%; max-width: 380px;
@@ -59,20 +58,11 @@
         .nav-item { 
             color: #aaa; 
             transition: 0.3s; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
             font-size: 20px;
         }
-        .nav-item span {
-            font-size: 10px;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-        .nav-item.active { 
-            color: #ff5e62; 
-            transform: translateY(-2px); 
-        }
+        .nav-item span { font-size: 10px; font-weight: 600; margin-top: 2px; }
+        .nav-item.active { color: #ff5e62; transform: translateY(-2px); }
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff9966; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -80,13 +70,14 @@
 </head>
 <body class="pb-28">
 
-    <!-- 1. AUTH SCREEN -->
-    <section id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/60 backdrop-blur-md hidden-modal">
+    <!-- 1. AUTH SCREEN (Default Visible, JS will hide if logged in) -->
+    <section id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/60 backdrop-blur-md">
         <div class="w-full max-w-sm glass-card p-8 shadow-2xl">
             <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500 text-center mb-1">System Book</h1>
             <p class="text-center text-gray-500 text-sm mb-6">Store Access</p>
 
             <div id="authForms">
+                <!-- Signup Box -->
                 <div id="signupBox">
                     <input id="rName" placeholder="Full Name" class="w-full p-4 mb-3 rounded-xl bg-white border-none outline-none text-sm shadow-sm">
                     <input id="rMob" type="number" placeholder="Mobile Number" class="w-full p-4 mb-3 rounded-xl bg-white border-none outline-none text-sm shadow-sm">
@@ -108,7 +99,7 @@
         </div>
     </section>
 
-    <!-- 2. MAIN APP -->
+    <!-- 2. MAIN APP (Default Hidden) -->
     <div id="appScreen" class="hidden-modal max-w-md mx-auto min-h-screen relative shadow-2xl bg-white/50">
         
         <!-- Header -->
@@ -124,12 +115,9 @@
 
         <!-- HOME -->
         <div id="tab-home" class="p-4">
-            <!-- Categories -->
             <div id="catContainer" class="flex gap-3 mb-6 overflow-x-auto pb-2 no-scrollbar">
                 <button class="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg shrink-0" onclick="filter('all')">All</button>
             </div>
-
-            <!-- Products -->
             <div id="prodList" class="grid grid-cols-2 gap-4 pb-20">
                 <div class="loader col-span-2"></div>
             </div>
@@ -146,21 +134,15 @@
             <div class="glass-card p-6 text-center mb-6 relative border-t-4 border-orange-400">
                 <button onclick="editProfile()" class="absolute top-4 right-4 text-orange-500 text-xs font-bold bg-orange-50 px-3 py-1 rounded-full"><i class="fa-solid fa-pen"></i></button>
                 <div class="w-20 h-20 bg-gradient-to-br from-orange-300 to-yellow-300 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl text-white shadow-md border-4 border-white">😎</div>
-                <h2 id="pName" class="font-bold text-xl text-gray-800">User Name</h2>
-                <p id="pEmail" class="text-gray-500 text-sm">user@email.com</p>
-                
+                <h2 id="pName" class="font-bold text-xl text-gray-800">User</h2>
+                <p id="pEmail" class="text-gray-500 text-sm">...</p>
                 <div class="mt-4 text-left bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Mobile</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">Mobile</p>
                     <p id="pMob" class="mb-3 font-semibold text-gray-700">...</p>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Address</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">Address</p>
                     <p id="pAddr" class="font-semibold text-gray-700 text-sm leading-tight">...</p>
                 </div>
             </div>
-
-            <button onclick="alert('Contact: 8769089527')" class="w-full glass-card p-4 mb-3 flex justify-between items-center font-bold text-gray-600">
-                <span><i class="fa-solid fa-phone text-green-500 mr-2"></i> Support</span>
-                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Call Now</span>
-            </button>
             <button onclick="logout()" class="w-full bg-white p-4 rounded-xl text-red-500 font-bold shadow-md hover:bg-red-50 transition border border-red-100">Logout</button>
         </div>
     </div>
@@ -172,7 +154,6 @@
                 <h3 class="font-bold text-xl text-gray-800">Checkout</h3>
                 <button onclick="document.getElementById('checkoutModal').classList.add('hidden-modal')" class="text-gray-400 text-xl">&times;</button>
             </div>
-
             <div class="flex gap-4 mb-4 bg-orange-50 p-3 rounded-xl border border-orange-100">
                 <img id="buyImg" class="w-16 h-16 rounded-lg object-cover bg-white shadow-sm">
                 <div>
@@ -180,35 +161,29 @@
                     <p id="buyPrice" class="text-orange-600 font-bold">₹0</p>
                 </div>
             </div>
-
             <div class="flex justify-between font-bold text-lg mb-4 p-3 bg-gray-50 rounded-xl text-gray-800">
                 <span>Total Amount</span> <span id="billTotal" class="text-orange-600">₹0</span>
             </div>
-            
             <p class="text-xs font-bold text-gray-400 mb-1">DELIVER TO</p>
             <p id="buyAddr" class="text-sm bg-gray-100 p-2 rounded mb-4 text-gray-600 border border-gray-200">...</p>
-
             <p class="text-xs font-bold text-gray-400 mb-2">PAYMENT METHOD</p>
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <label class="flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50 transition">
+                <label class="flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
                     <input type="radio" name="pay" value="COD" checked class="hidden">
                     <i class="fa-solid fa-money-bill-wave text-2xl text-green-600 mb-1"></i>
                     <span class="text-xs font-bold text-gray-600">Cash</span>
                 </label>
-                <label class="flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition">
+                <label class="flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                     <input type="radio" name="pay" value="Online" class="hidden">
                     <i class="fa-brands fa-cc-visa text-2xl text-blue-600 mb-1"></i>
                     <span class="text-xs font-bold text-gray-600">Online</span>
                 </label>
             </div>
-
-            <button onclick="processPayment()" class="w-full glass-btn py-3 rounded-xl font-bold shadow-xl text-lg">
-                CONFIRM ORDER
-            </button>
+            <button onclick="processPayment()" class="w-full glass-btn py-3 rounded-xl font-bold shadow-xl text-lg">CONFIRM ORDER</button>
         </div>
     </div>
 
-    <!-- PROFILE EDIT MODAL -->
+    <!-- EDIT MODAL -->
     <div id="editModal" class="hidden-modal fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm p-6 rounded-2xl shadow-2xl">
             <h3 class="font-bold text-lg mb-4 text-gray-800">Edit Profile</h3>
@@ -219,20 +194,11 @@
         </div>
     </div>
 
-    <!-- NAVIGATION (With Names) -->
+    <!-- NAVIGATION -->
     <nav id="navBar" class="nav-island hidden-modal">
-        <button onclick="switchTab('home')" id="btn-home" class="nav-item active">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </button>
-        <button onclick="switchTab('orders')" id="btn-orders" class="nav-item">
-            <i class="fa-solid fa-box-open"></i>
-            <span>Orders</span>
-        </button>
-        <button onclick="switchTab('profile')" id="btn-profile" class="nav-item">
-            <i class="fa-solid fa-user"></i>
-            <span>Profile</span>
-        </button>
+        <button onclick="switchTab('home')" id="btn-home" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></button>
+        <button onclick="switchTab('orders')" id="btn-orders" class="nav-item"><i class="fa-solid fa-box-open"></i><span>Orders</span></button>
+        <button onclick="switchTab('profile')" id="btn-profile" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></button>
     </nav>
 
     <!-- LOGIC -->
@@ -249,15 +215,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // STORAGE KEY
-        const STORAGE_KEY = 'sys_user_final_v2';
+        const STORAGE_KEY = 'sys_user_final_v1';
         let user = JSON.parse(localStorage.getItem(STORAGE_KEY));
         let products = [];
         let selectedProduct = null;
         let isSignup = true;
 
-        // AUTO LOGIN
         if(user) {
+            document.getElementById('authScreen').classList.add('hidden-modal');
             document.getElementById('appScreen').classList.remove('hidden-modal');
             document.getElementById('navBar').classList.remove('hidden-modal');
             initData();
@@ -265,7 +230,6 @@
             document.getElementById('authScreen').classList.remove('hidden-modal');
         }
 
-        // AUTH
         function toggleSign() {
             isSignup = !isSignup;
             document.getElementById('signupBox').classList.toggle('hidden-modal');
@@ -285,21 +249,19 @@
                 const name = document.getElementById('rName').value;
                 const mob = document.getElementById('rMob').value;
                 const addr = document.getElementById('rAddr').value;
-                if(!name || !mob) { 
-                    alert("Fill details");
-                    resetAuthUI(); return;
-                }
+                if(!name || !mob) { alert("Fill all details"); resetUI(); return; }
+
                 const data = {name, email, mobile: mob, addr, pass};
                 db.ref('users/'+key).set(data).then(()=> success(data));
             } else {
                 db.ref('users/'+key).once('value', snap => {
                     if(snap.val() && snap.val().pass == pass) success(snap.val());
-                    else { alert("Login Failed"); resetAuthUI(); }
+                    else { alert("Login Failed"); resetUI(); }
                 });
             }
         }
 
-        function resetAuthUI() {
+        function resetUI() {
             document.getElementById('authLoad').classList.add('hidden-modal');
             document.getElementById('authForms').classList.remove('hidden-modal');
         }
@@ -307,18 +269,20 @@
         function success(data) {
             user = data;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            location.reload(); 
+        }
+
+        function logout() {
+            localStorage.removeItem(STORAGE_KEY);
             location.reload();
         }
 
-        function logout() { localStorage.removeItem(STORAGE_KEY); location.reload(); }
-
-        // DATA
         function initData() {
             db.ref('categories').on('value', s => {
                 const c = document.getElementById('catContainer');
-                c.innerHTML = `<button class="bg-white text-orange-600 px-6 py-2 rounded-full text-xs font-bold shadow-sm shrink-0 border border-orange-200" onclick="filter('all')">All</button>`;
+                c.innerHTML = `<button class="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg shrink-0" onclick="filter('all')">All</button>`;
                 if(s.val()) Object.values(s.val()).forEach(cat => {
-                    c.innerHTML += `<button class="bg-white/60 text-gray-700 px-6 py-2 rounded-full text-xs font-bold shrink-0 border border-white" onclick="filter('${cat.name}')">${cat.name}</button>`;
+                    c.innerHTML += `<button class="bg-white text-gray-700 border border-gray-200 px-6 py-2 rounded-full text-xs font-bold shrink-0 shadow-sm" onclick="filter('${cat.name}')">${cat.name}</button>`;
                 });
             });
 
@@ -350,7 +314,7 @@
                                     <span class="block text-lg font-bold text-orange-600">₹${p.price}</span>
                                     <span class="text-[10px] text-gray-400">+₹${p.delivery} Del.</span>
                                 </div>
-                                <button onclick="openBuy('${p.id}')" class="bg-orange-500 text-white px-4 py-1.5 rounded-lg shadow-lg text-xs font-bold hover:bg-orange-600">BUY</button>
+                                <button onclick="openBuy('${p.id}')" class="bg-gradient-to-r from-orange-400 to-red-500 text-white px-4 py-1.5 rounded-lg shadow-lg text-xs font-bold hover:opacity-90">BUY</button>
                             </div>
                         </div>
                     </div>
@@ -363,7 +327,6 @@
             else render(products.filter(p=>p.cat===c));
         }
 
-        // PROFILE
         function updateProfile() {
             document.getElementById('pName').innerText = user.name;
             document.getElementById('pEmail').innerText = user.email;
@@ -389,40 +352,50 @@
             });
         }
 
-        // CHECKOUT & PAYMENT
         function openBuy(id) {
             selectedProduct = products.find(p => p.id === id);
             document.getElementById('buyImg').src = selectedProduct.img;
             document.getElementById('buyTitle').innerText = selectedProduct.title;
             document.getElementById('buyPrice').innerText = "₹"+selectedProduct.price;
             document.getElementById('buyAddr').innerText = user.addr;
-            
             const total = parseInt(selectedProduct.price) + parseInt(selectedProduct.delivery);
             document.getElementById('billTotal').innerText = "₹"+total;
             document.getElementById('checkoutModal').classList.remove('hidden-modal');
         }
 
+        // --- UPDATED RAZORPAY PAYMENT LOGIC ---
         function processPayment() {
             if(!user.addr || user.addr.length < 5) return alert("Update Address First");
             const method = document.querySelector('input[name="pay"]:checked').value;
             const total = parseInt(selectedProduct.price) + parseInt(selectedProduct.delivery);
 
             if(method === "Online") {
-                // RAZORPAY LIVE/TEST INTEGRATION
                 var options = {
-                    "key": "rzp_live_Ry7zglI0OnE1Jo", // YOUR LIVE KEY
-                    "amount": total * 100, // Amount in paise
+                    // YAHAN APNI REAL RAZORPAY LIVE KEY DAALEIN 👇
+                    "key": "YOUR_LIVE_API_KEY_HERE", 
+                    "amount": total * 100, // Amount in Paise (e.g. 500 Rs = 50000 paise)
                     "currency": "INR",
-                    "name": "System Book",
-                    "description": "Purchase",
-                    "image": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-                    "handler": function (response){
+                    "name": "System Book Store",
+                    "description": "Purchase: " + selectedProduct.title,
+                    "handler": function (response) {
+                        // Jab payment ho jayega toh direct ye function run hoga aur order save ho jayega
                         createOrder("Online", response.razorpay_payment_id);
+                    },
+                    "prefill": {
+                        "name": user.name,
+                        "email": user.email,
+                        "contact": user.mobile
                     },
                     "theme": { "color": "#ff5e62" }
                 };
+                
                 var rzp1 = new Razorpay(options);
-                rzp1.open();
+                
+                rzp1.on('payment.failed', function (response){
+                    alert("Payment Failed: " + response.error.description);
+                });
+                
+                rzp1.open(); // Ye Razorpay ka popup khol dega mobile me
                 
             } else {
                 createOrder("COD", "Pending");
@@ -449,28 +422,25 @@
             };
 
             db.ref('orders/'+oid).set(order).then(() => {
-                alert("Order Placed!");
+                alert("Order Placed Successfully!");
                 document.getElementById('checkoutModal').classList.add('hidden-modal');
                 switchTab('orders');
             });
         }
 
-        // NAV
         function switchTab(t) {
             ['home','orders','profile'].forEach(i => document.getElementById('tab-'+i).classList.add('hidden-modal'));
             document.getElementById('tab-'+t).classList.remove('hidden-modal');
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-'+t).classList.add('active');
-
             if(t === 'orders') {
                 db.ref('orders').orderByChild('userEmail').equalTo(user.email).on('value', s => {
                     const l = document.getElementById('orderList'); l.innerHTML="";
-                    if(!s.val()) { l.innerHTML="<p class='text-gray-500 text-center mt-10'>No Orders Found</p>"; return;}
+                    if(!s.val()) { l.innerHTML="<p class='text-gray-500 text-center mt-10'>No Orders</p>"; return;}
                     Object.values(s.val()).sort((a,b)=>b.oid-a.oid).forEach(o => {
                         let c = "bg-yellow-400 text-yellow-900";
                         if(o.status === 'Shipped') c = "bg-blue-400 text-blue-900";
                         if(o.status === 'Delivered') c = "bg-green-400 text-green-900";
-
                         l.innerHTML += `
                             <div class="glass-card p-4">
                                 <div class="flex justify-between items-start mb-2">
