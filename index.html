@@ -22,10 +22,8 @@
             color: #333;
         }
 
-        /* Utility Class to Hide Elements */
         .hidden-modal { display: none !important; }
 
-        /* Glassmorphism */
         .glass-card {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
@@ -42,7 +40,6 @@
         }
         .glass-btn:active { transform: scale(0.96); }
 
-        /* Floating Nav */
         .nav-island {
             position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
             width: 95%; max-width: 380px;
@@ -55,29 +52,27 @@
             border: 1px solid white;
         }
         
-        .nav-item { 
-            color: #aaa; 
-            transition: 0.3s; 
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 20px;
-        }
+        .nav-item { color: #aaa; transition: 0.3s; display: flex; flex-direction: column; align-items: center; font-size: 20px; }
         .nav-item span { font-size: 10px; font-weight: 600; margin-top: 2px; }
         .nav-item.active { color: #ff5e62; transform: translateY(-2px); }
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff9966; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="pb-28">
 
-    <!-- 1. AUTH SCREEN (Default Visible, JS will hide if logged in) -->
+    <!-- 1. AUTH SCREEN -->
     <section id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/60 backdrop-blur-md">
         <div class="w-full max-w-sm glass-card p-8 shadow-2xl">
             <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500 text-center mb-1">System Book</h1>
             <p class="text-center text-gray-500 text-sm mb-6">Store Access</p>
 
             <div id="authForms">
-                <!-- Signup Box -->
                 <div id="signupBox">
                     <input id="rName" placeholder="Full Name" class="w-full p-4 mb-3 rounded-xl bg-white border-none outline-none text-sm shadow-sm">
                     <input id="rMob" type="number" placeholder="Mobile Number" class="w-full p-4 mb-3 rounded-xl bg-white border-none outline-none text-sm shadow-sm">
@@ -99,11 +94,11 @@
         </div>
     </section>
 
-    <!-- 2. MAIN APP (Default Hidden) -->
+    <!-- 2. MAIN APP -->
     <div id="appScreen" class="hidden-modal max-w-md mx-auto min-h-screen relative shadow-2xl bg-white/50">
         
         <!-- Header -->
-        <header class="p-5 flex justify-between items-center sticky top-0 z-20 bg-white/80 backdrop-blur-md shadow-sm">
+        <header class="p-5 flex justify-between items-center sticky top-0 z-20 bg-white/80 backdrop-blur-md shadow-sm mb-2">
             <div>
                 <h2 class="font-bold text-2xl text-gray-800">System Book</h2>
                 <p class="text-xs text-orange-500 font-bold tracking-wide">Premium Store</p>
@@ -114,10 +109,25 @@
         </header>
 
         <!-- HOME -->
-        <div id="tab-home" class="p-4">
-            <div id="catContainer" class="flex gap-3 mb-6 overflow-x-auto pb-2 no-scrollbar">
-                <button class="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg shrink-0" onclick="filter('all')">All</button>
+        <div id="tab-home" class="p-4 pt-0">
+            
+            <!-- NEW: HINDI / ENGLISH SLIDER -->
+            <div class="flex justify-center mb-5">
+                <div class="bg-white p-1 rounded-full flex w-full max-w-[320px] relative shadow-sm border border-gray-200">
+                    <!-- Slider Background pill -->
+                    <div id="sliderBg" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-gradient-to-r from-orange-400 to-red-500 rounded-full shadow-md transition-transform duration-300 transform translate-x-0"></div>
+                    
+                    <button onclick="setMedium('Hindi')" id="btnMedHindi" class="flex-1 relative z-10 text-[12px] font-bold py-2.5 text-white transition-colors duration-300 tracking-wide">HINDI MEDIUM</button>
+                    <button onclick="setMedium('English')" id="btnMedEnglish" class="flex-1 relative z-10 text-[12px] font-bold py-2.5 text-gray-500 transition-colors duration-300 tracking-wide">ENGLISH MEDIUM</button>
+                </div>
             </div>
+
+            <!-- Category Container -->
+            <div id="catContainer" class="flex gap-3 mb-6 overflow-x-auto pb-2 no-scrollbar">
+                <!-- Loaded by JS based on Selected Medium -->
+            </div>
+            
+            <!-- Product List -->
             <div id="prodList" class="grid grid-cols-2 gap-4 pb-20">
                 <div class="loader col-span-2"></div>
             </div>
@@ -217,9 +227,14 @@
 
         const STORAGE_KEY = 'sys_user_final_v1';
         let user = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        let products = [];
+        let allProductsData = [];
+        let allCatsData = [];
         let selectedProduct = null;
         let isSignup = true;
+        
+        // NEW STATE VARS FOR MEDIUM
+        let currentMedium = 'Hindi';
+        let currentCat = 'all';
 
         if(user) {
             document.getElementById('authScreen').classList.add('hidden-modal');
@@ -279,35 +294,94 @@
 
         function initData() {
             db.ref('categories').on('value', s => {
-                const c = document.getElementById('catContainer');
-                c.innerHTML = `<button class="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg shrink-0" onclick="filter('all')">All</button>`;
-                if(s.val()) Object.values(s.val()).forEach(cat => {
-                    c.innerHTML += `<button class="bg-white text-gray-700 border border-gray-200 px-6 py-2 rounded-full text-xs font-bold shrink-0 shadow-sm" onclick="filter('${cat.name}')">${cat.name}</button>`;
-                });
+                allCatsData = s.val() ? Object.values(s.val()) : [];
+                filterView();
             });
 
             db.ref('products').on('value', s => {
-                products = [];
-                const l = document.getElementById('prodList');
-                l.innerHTML="";
-                if(s.val()) Object.keys(s.val()).forEach(k => products.push({id:k, ...s.val()[k]}));
-                if(products.length === 0) l.innerHTML="<p class='col-span-2 text-center text-gray-500'>No Products</p>";
-                render(products);
+                allProductsData = [];
+                if(s.val()) Object.keys(s.val()).forEach(k => allProductsData.push({id:k, ...s.val()[k]}));
+                filterView();
             });
             updateProfile();
         }
 
+        // --- NEW: MEDIUM SLIDER LOGIC ---
+        function setMedium(m) {
+            currentMedium = m;
+            currentCat = 'all'; // Reset category when switching medium
+            
+            const sliderBg = document.getElementById('sliderBg');
+            const btnH = document.getElementById('btnMedHindi');
+            const btnE = document.getElementById('btnMedEnglish');
+
+            if(m === 'Hindi') {
+                sliderBg.style.transform = 'translateX(0)';
+                btnH.classList.replace('text-gray-500', 'text-white');
+                btnE.classList.replace('text-white', 'text-gray-500');
+            } else {
+                // Move slider to right
+                sliderBg.style.transform = 'translateX(100%)';
+                btnE.classList.replace('text-gray-500', 'text-white');
+                btnH.classList.replace('text-white', 'text-gray-500');
+            }
+            filterView();
+        }
+
+        function setCat(c) {
+            currentCat = c;
+            filterView();
+        }
+
+        // --- NEW: FILTER & RENDER BASED ON MEDIUM & CATEGORY ---
+        function filterView() {
+            // 1. Update Categories UI
+            const cContainer = document.getElementById('catContainer');
+            
+            let btnClassAll = currentCat === 'all' 
+                ? "bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-lg" 
+                : "bg-white text-gray-700 border border-gray-200 shadow-sm";
+            
+            let catHTML = `<button class="${btnClassAll} px-6 py-2 rounded-full text-xs font-bold shrink-0 transition-all" onclick="setCat('all')">All</button>`;
+            
+            allCatsData.forEach(cat => {
+                const med = cat.medium || 'Hindi'; // Fallback for old data
+                if(med === currentMedium) {
+                    let btnClass = currentCat === cat.name 
+                        ? "bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-lg" 
+                        : "bg-white text-gray-700 border border-gray-200 shadow-sm";
+                    catHTML += `<button class="${btnClass} px-6 py-2 rounded-full text-xs font-bold shrink-0 transition-all" onclick="setCat('${cat.name}')">${cat.name}</button>`;
+                }
+            });
+            cContainer.innerHTML = catHTML;
+
+            // 2. Filter & Render Products
+            const pList = document.getElementById('prodList');
+            pList.innerHTML = "";
+            
+            let filteredProducts = allProductsData.filter(p => (p.medium || 'Hindi') === currentMedium);
+            
+            if(currentCat !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.cat === currentCat);
+            }
+
+            if(filteredProducts.length === 0) {
+                pList.innerHTML = "<p class='col-span-2 text-center text-gray-400 font-bold mt-10'>No books found in this section</p>";
+            } else {
+                render(filteredProducts);
+            }
+        }
+
         function render(arr) {
             const l = document.getElementById('prodList');
-            l.innerHTML = "";
             arr.forEach(p => {
                 l.innerHTML += `
-                    <div class="glass-card p-3 flex flex-col h-full hover:scale-[1.02] transition duration-300">
-                        <div class="h-32 bg-gray-100 rounded-xl overflow-hidden mb-3 border border-gray-100">
+                    <div class="glass-card p-3 flex flex-col h-full hover:scale-[1.02] transition duration-300 relative">
+                        <div class="h-32 bg-gray-100 rounded-xl overflow-hidden mb-3 border border-gray-100 relative">
                             <img src="${p.img}" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1 flex flex-col">
-                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${p.cat}</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">${p.cat}</span>
                             <h3 class="font-bold text-gray-800 text-sm leading-tight mb-1 line-clamp-2">${p.title}</h3>
                             <div class="mt-auto pt-2 flex items-center justify-between">
                                 <div>
@@ -320,11 +394,6 @@
                     </div>
                 `;
             });
-        }
-
-        function filter(c) {
-            if(c==='all') render(products);
-            else render(products.filter(p=>p.cat===c));
         }
 
         function updateProfile() {
@@ -353,7 +422,7 @@
         }
 
         function openBuy(id) {
-            selectedProduct = products.find(p => p.id === id);
+            selectedProduct = allProductsData.find(p => p.id === id);
             document.getElementById('buyImg').src = selectedProduct.img;
             document.getElementById('buyTitle').innerText = selectedProduct.title;
             document.getElementById('buyPrice').innerText = "₹"+selectedProduct.price;
@@ -363,7 +432,6 @@
             document.getElementById('checkoutModal').classList.remove('hidden-modal');
         }
 
-        // --- UPDATED RAZORPAY PAYMENT LOGIC ---
         function processPayment() {
             if(!user.addr || user.addr.length < 5) return alert("Update Address First");
             const method = document.querySelector('input[name="pay"]:checked').value;
@@ -371,14 +439,12 @@
 
             if(method === "Online") {
                 var options = {
-                    // YAHAN APNI REAL RAZORPAY LIVE KEY DAALEIN 👇
                     "key": "rzp_live_Ry7zglI0OnE1Jo", 
-                    "amount": total * 100, // Amount in Paise (e.g. 500 Rs = 50000 paise)
+                    "amount": total * 100, 
                     "currency": "INR",
                     "name": "System Book Store",
                     "description": "Purchase: " + selectedProduct.title,
                     "handler": function (response) {
-                        // Jab payment ho jayega toh direct ye function run hoga aur order save ho jayega
                         createOrder("Online", response.razorpay_payment_id);
                     },
                     "prefill": {
@@ -388,15 +454,11 @@
                     },
                     "theme": { "color": "#ff5e62" }
                 };
-                
                 var rzp1 = new Razorpay(options);
-                
                 rzp1.on('payment.failed', function (response){
                     alert("Payment Failed: " + response.error.description);
                 });
-                
-                rzp1.open(); // Ye Razorpay ka popup khol dega mobile me
-                
+                rzp1.open(); 
             } else {
                 createOrder("COD", "Pending");
             }
