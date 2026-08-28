@@ -389,7 +389,6 @@
         function render(arr) {
             const l = document.getElementById('prodList');
             arr.forEach(p => {
-                // Button text changed to "खरीदें"
                 l.innerHTML += `
                     <div class="glass-card p-3 flex flex-col h-full hover:scale-[1.02] transition duration-300 relative">
                         <div class="h-32 bg-gray-100 rounded-xl overflow-hidden mb-3 border border-gray-100 relative">
@@ -432,7 +431,6 @@
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
                 updateProfile();
                 document.getElementById('editModal').classList.add('hidden-modal');
-                // Automatically update checkout screen address if it's open
                 if(document.getElementById('buyAddr')) {
                     document.getElementById('buyAddr').innerText = user.addr;
                 }
@@ -449,7 +447,7 @@
             document.getElementById('chkPrice').innerText = "₹" + selectedProduct.price;
             document.getElementById('chkDel').innerText = "+₹" + selectedProduct.delivery;
             
-            const total = parseInt(selectedProduct.price) + parseInt(selectedProduct.delivery);
+            const total = (Number(selectedProduct.price) || 0) + (Number(selectedProduct.delivery) || 0);
             document.getElementById('billTotal').innerText = "₹" + total;
             
             document.getElementById('buyAddr').innerText = user.addr;
@@ -459,30 +457,51 @@
         function processPayment() {
             if(!user.addr || user.addr.length < 5) return alert("Please update your delivery address first.");
             const method = document.querySelector('input[name="pay"]:checked').value;
-            const total = parseInt(selectedProduct.price) + parseInt(selectedProduct.delivery);
+            const total = (Number(selectedProduct.price) || 0) + (Number(selectedProduct.delivery) || 0);
 
             if(method === "Online") {
+                if (typeof Razorpay === 'undefined') {
+                    alert("Razorpay SDK लोड नहीं हो सका। कृपया इंटरनेट कनेक्शन जांचें।");
+                    return;
+                }
+
+                const razorpayKey = "rzp_live_Ry7zglI0OnE1Jo";
+
                 var options = {
-                    "key": "YOUR_LIVE_API_KEY_HERE", 
-                    "amount": total * 100, 
+                    "key": razorpayKey, 
+                    "amount": Math.round(total * 100), // Amount in paise
                     "currency": "INR",
                     "name": "System Book Store",
                     "description": "Purchase: " + selectedProduct.title,
                     "handler": function (response) {
-                        createOrder("Online", response.razorpay_payment_id);
+                        if (response.razorpay_payment_id) {
+                            createOrder("Online", response.razorpay_payment_id);
+                        } else {
+                            alert("Payment verification failed.");
+                        }
                     },
                     "prefill": {
-                        "name": user.name,
-                        "email": user.email,
-                        "contact": user.mobile
+                        "name": user.name || "",
+                        "email": user.email || "",
+                        "contact": String(user.mobile || "")
                     },
-                    "theme": { "color": "#ff5e62" }
+                    "theme": { "color": "#ff5e62" },
+                    "modal": {
+                        "ondismiss": function() {
+                            console.log("Checkout modal closed");
+                        }
+                    }
                 };
-                var rzp1 = new Razorpay(options);
-                rzp1.on('payment.failed', function (response){
-                    alert("Payment Failed: " + response.error.description);
-                });
-                rzp1.open(); 
+
+                try {
+                    var rzp1 = new Razorpay(options);
+                    rzp1.on('payment.failed', function (response){
+                        alert("Payment Failed: " + (response.error.description || "Unknown error"));
+                    });
+                    rzp1.open();
+                } catch (e) {
+                    alert("पेमेंट शुरू करने में त्रुटि: " + e.message);
+                }
             } else {
                 createOrder("COD", "Pending");
             }
@@ -490,7 +509,7 @@
 
         function createOrder(method, txnId) {
             const oid = Date.now();
-            const total = parseInt(selectedProduct.price) + parseInt(selectedProduct.delivery);
+            const total = (Number(selectedProduct.price) || 0) + (Number(selectedProduct.delivery) || 0);
             const order = {
                 oid,
                 productTitle: selectedProduct.title,
@@ -511,6 +530,8 @@
                 alert("Order Placed Successfully!");
                 document.getElementById('checkoutModal').classList.add('hidden-modal');
                 switchTab('orders');
+            }).catch((err) => {
+                alert("Order save failed: " + err.message);
             });
         }
 
